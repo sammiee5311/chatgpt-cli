@@ -1,0 +1,7 @@
+pytest
+pytest-cov
+pytest-env
+mypy
+black
+isort
+tox
