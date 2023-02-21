@@ -1,14 +1,14 @@
-from setuptools import find_packages, setup
+from setuptools import find_packages
+from setuptools import setup
 
 dev_requires = [
     "pytest",
-    "pytest-cov"
-    "pytest-env",
+    "pytest-cov" "pytest-env",
     "black",
     "mypy",
     "isort",
     "tox",
-    ]
+]
 
 if __name__ == "__main__":
     setup(
