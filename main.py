@@ -13,7 +13,7 @@ from pydantic import BaseModel
 load_dotenv(dotenv_path=".env")
 
 HOST = os.environ.get("HOST")
-PORT = int(os.environ.get("PORT"))
+PORT = int(os.environ.get("PORT", 5005))
 OPENAPI_KEY = os.environ.get("OPENAPI_KEY")
 
 app = FastAPI()

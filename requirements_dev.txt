@@ -1,3 +1,7 @@
+python-dotenv
+fastapi
+uvicorn[standard]
+openai
 pytest
 pytest-cov
 pytest-env
@@ -5,3 +9,6 @@ mypy
 black
 isort
 tox
+requests-mock
+mock
+httpx
