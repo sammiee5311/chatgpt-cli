@@ -14,7 +14,7 @@ from utils.model import Davinci
 
 load_dotenv(dotenv_path=".env")
 
-HOST = os.environ.get("HOST")
+HOST = os.environ.get("HOST", "localhost")
 PORT = int(os.environ.get("PORT", 5005))
 OPENAPI_KEY = os.environ.get("OPENAPI_KEY")
 
@@ -35,8 +35,8 @@ openai.api_key = OPENAPI_KEY
 
 
 @app.post("/ask")
-async def send_ask(prompt: Prompt):
-    response = openai.Completion.create(
+async def send_ask(prompt: Prompt) -> Response:
+    response = openai.Completion.create(  # type: ignore
         engine=model.name,
         prompt=prompt.text,
         max_tokens=model.token,
@@ -45,7 +45,8 @@ async def send_ask(prompt: Prompt):
 
     if not response.choices:
         raise HTTPException(
-            dict(text="Open AI did not respond output from your prompt text. Please try again.", message="empty")
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            dict(text="Open AI did not respond output from your prompt text. Please try again.", message="empty"),
         )
 
     try:
@@ -59,7 +60,7 @@ async def send_ask(prompt: Prompt):
 
 
 @app.get("/")
-async def main():
+async def main() -> Response:
     return Response(text="This is backend for chatGPT.", message="success")
 
 
