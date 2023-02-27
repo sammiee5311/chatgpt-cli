@@ -10,12 +10,15 @@ from fastapi import HTTPException
 from fastapi import status
 from pydantic import BaseModel
 
+from utils.model import Davinci
+
 load_dotenv(dotenv_path=".env")
 
 HOST = os.environ.get("HOST")
 PORT = int(os.environ.get("PORT", 5005))
 OPENAPI_KEY = os.environ.get("OPENAPI_KEY")
 
+model = Davinci()
 app = FastAPI()
 
 
@@ -34,9 +37,9 @@ openai.api_key = OPENAPI_KEY
 @app.post("/ask")
 async def send_ask(prompt: Prompt):
     response = openai.Completion.create(
-        engine="text-davinci-003",
+        engine=model.name,
         prompt=prompt.text,
-        max_tokens=4000,
+        max_tokens=model.token,
         temperature=0.5,
     )
 
