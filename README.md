@@ -1,5 +1,10 @@
 # chatpg
 
+[![CI](https://github.com/sammiee5311/chatpg/actions/workflows/CI.yaml/badge.svg)](https://github.com/sammiee5311/chatpg/actions/workflows/CI.yaml) [![python](./imgs/python-version.svg)]() [![](./imgs/coverage.svg?dummy=8484744)]()
+
+## prerequisites
+- <= python 3.8
+
 # Setup Environment
 - Dev
     - Run `make setup-dev-chatpg`
