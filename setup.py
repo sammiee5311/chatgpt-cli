@@ -23,8 +23,6 @@ if __name__ == "__main__":
         packages=find_packages(exclude=("tests")),
         install_requires=[
             "python-dotenv",
-            "fastapi",
-            "uvicorn[standard]",
             "openai",
         ],
         extras_require={"dev": dev_requires},

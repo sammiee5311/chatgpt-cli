@@ -1,6 +1,4 @@
 python-dotenv
-fastapi
-uvicorn[standard]
 openai
 pytest
 pytest-cov

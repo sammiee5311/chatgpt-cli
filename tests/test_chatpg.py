@@ -5,12 +5,9 @@ from dataclasses import field
 from typing import Any
 
 import mock
-from fastapi import status
-from fastapi.testclient import TestClient
 
-from main import app
-
-client = TestClient(app)
+from modules.chatgpt import ChatGPT
+from utils.model import Davinci
 
 
 @dataclass
@@ -19,17 +16,12 @@ class CompletionMockResponse:
 
 
 def completion_mock_response(**kwgs: dict[str, Any]) -> CompletionMockResponse:
-    return CompletionMockResponse(choices=[{"text": "test"}])
-
-
-def test_root() -> None:
-    response = client.get("/")
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {"text": "This is backend for chatGPT.", "message": "success"}
+    return CompletionMockResponse(choices=[{"text": "I am good, how are you?"}])
 
 
 @mock.patch("openai.Completion.create", completion_mock_response)
 def test_ask() -> None:
-    response = client.post("/ask", json=dict(text="How are you?"))
+    chatgpt = ChatGPT(Davinci())
+    response_text = chatgpt.ask("Hello, How are you?")
 
-    assert response.json() == {"text": "test", "message": "success"}
+    assert response_text == "I am good, how are you?"
