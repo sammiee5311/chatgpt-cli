@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from typing import TypedDict
+from typing import Dict
+from typing import Union
 
 import openai
 from dotenv import load_dotenv
-from openai.openai_object import OpenAIObject
 
 from utils.exceptions import ChatGPTExecption
 from utils.model import ChatGPTModel
@@ -19,7 +19,7 @@ openai.api_key = OPENAPI_KEY
 
 
 @dataclass
-class Choice(dict[str, str | int]):
+class Choice(Dict[str, Union[str, int]]):
     finished_reason: str
     index: int
     text: str
