@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import Protocol
 
 
@@ -30,3 +31,10 @@ class Babbage:
 class Ada:
     name: str = "text-ada-001"
     token: int = 2048
+
+
+class ChatGPTModels(Enum):
+    DAVINCI = Davinci
+    CURIE = Curie
+    BABBAGE = Babbage
+    ADA = Ada
