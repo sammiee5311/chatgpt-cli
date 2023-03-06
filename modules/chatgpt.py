@@ -14,8 +14,10 @@ from utils.model import ChatGPTModel
 load_dotenv(dotenv_path=".env")
 
 OPENAPI_KEY = os.environ.get("OPENAPI_KEY")
-
 openai.api_key = OPENAPI_KEY
+
+if not OPENAPI_KEY:
+    raise ChatGPTExecption("Please set the 'OPENAPI_KEY' environment in '.env' file.")
 
 
 @dataclass
