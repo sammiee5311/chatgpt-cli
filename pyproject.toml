@@ -1,6 +1,11 @@
 [tool.black]
 line-length = 120
 
+[tool.pytest.ini_options]
+env = [
+  "OPENAPI_KEY=OPENAPI_KEY",
+]
+
 [tool.mypy]
 ignore_missing_imports = true
 exclude = ["venv/"]
