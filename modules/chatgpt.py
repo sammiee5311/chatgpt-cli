@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 from utils.exceptions import ChatGPTExecption
 from utils.model import ChatGPTModel
+from utils.model import Turbo
 
 load_dotenv(dotenv_path=".env")
 
@@ -48,6 +49,13 @@ class ChatGPTResponse:
 class ChatGPT:
     def __init__(self, model: ChatGPTModel) -> None:
         self.model = model
+        self.check_turbo_model()
+
+    def check_turbo_model(self) -> None:
+        self.is_turbo = self.model.__class__.__name__ == Turbo.__name__
+
+        if self.is_turbo:
+            self.messages = [{"role": "system", "content": "You are a therapist."}]
 
     def ask(self, text: str) -> str:
         response: ChatGPTResponse = openai.Completion.create(  # type: ignore
