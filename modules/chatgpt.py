@@ -22,10 +22,17 @@ if not OPENAPI_KEY:
 
 
 @dataclass
+class Message(Dict[str, str]):
+    content: str
+    role: str
+
+
+@dataclass
 class Choice(Dict[str, Union[str, int]]):
     finished_reason: str
     index: int
-    text: str
+    text: str | None
+    message: Message | None
     # logprobs: int | None ?
 
 
@@ -55,25 +62,53 @@ class ChatGPT:
         self.is_turbo = self.model.__class__.__name__ == Turbo.__name__
 
         if self.is_turbo:
-            self.messages = [{"role": "system", "content": "You are a therapist."}]
+            self.messages = [{"role": "system", "content": "You are a helpful assistant."}]
 
-    def ask(self, text: str) -> str:
-        response: ChatGPTResponse = openai.Completion.create(  # type: ignore
+    def parse_choice_from_response(self, response: ChatGPTResponse) -> Choice:
+        if not response.choices:
+            raise ChatGPTExecption("Open AI did not respond output from your question. Please try again.")
+
+        return response.choices[0]
+
+    def send_question_with_turbo_model(self, text: str) -> str:
+        self.messages.append({"role": "user", "content": text})
+
+        response = openai.ChatCompletion.create(  # type: ignore
+            model=self.model.name, messages=self.messages, max_tokens=self.model.token, temperature=0.5
+        )
+
+        choice = self.parse_choice_from_response(response)
+
+        if not choice and not "message" in choice:
+            raise ChatGPTExecption("Something went wrong.")
+
+        if isinstance(choice["message"], dict) and isinstance(choice["message"]["content"], str):
+            self.messages.append(choice["message"])
+            response_text = choice["message"]["content"].strip()
+
+        return response_text
+
+    def send_question_to_others_models(self, text: str) -> str:
+        response = openai.Completion.create(  # type: ignore
             engine=self.model.name,
             prompt=text,
             max_tokens=self.model.token,
             temperature=0.5,
         )
 
-        if not response.choices:
-            raise ChatGPTExecption("Open AI did not respond output from your prompt text. Please try again.")
+        choice = self.parse_choice_from_response(response)
 
-        choice = response.choices[0]
-
-        if not choice or not "text" in choice:
+        if not choice and not "text" in choice:
             raise ChatGPTExecption("Something went wrong.")
 
         if "text" in choice and isinstance(choice["text"], str):
             response_text = choice["text"].strip()
+
+        return response_text
+
+    def ask(self, text: str) -> str:
+        response_text = (
+            self.send_question_with_turbo_model(text) if self.is_turbo else self.send_question_to_others_models(text)
+        )
 
         return response_text
