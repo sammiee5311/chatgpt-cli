@@ -3,10 +3,8 @@ from __future__ import annotations
 from argparse import ArgumentParser
 
 from mode import start_asking
-from utils.exceptions import ChatGPTExecption
 from utils.model import ChatGPTModel
 from utils.model import ChatGPTModels
-from utils.model import Turbo
 
 models = list(map(lambda name: name.lower(), ChatGPTModels._member_names_))
 
