@@ -1,17 +1,22 @@
 import json
+import os
 import sqlite3
 from sqlite3 import Cursor
 from types import TracebackType
 from typing import Optional
 from typing import Type
 
+from utils.log import logger
 
-DB_FILE = "history.sqlite3"
+DB_FILE = os.environ.get("DB_FILE", "history.sqlite3")
 
 
 class Database:
+    def __init__(self, file: str = DB_FILE):
+        self.file = file
+
     def __enter__(self) -> Cursor:
-        self.conn = sqlite3.connect(DB_FILE)
+        self.conn = sqlite3.connect(self.file)
         return self.conn.cursor()
 
     def __exit__(
@@ -20,15 +25,14 @@ class Database:
         exc_inst: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> bool:
-        print("commiting...")
+        logger.debug("commiting...")
         self.conn.commit()
-        print("closing...")
         self.conn.close()
 
 
 class History:
     def __init__(self, database: Database):
-        self.database = Database
+        self.database = database
         self.init_history()
 
     def init_history(self) -> None:
@@ -50,22 +54,25 @@ class History:
 
     def delete_messages(self, name: str, created_at) -> None:
         with self.database() as curr:
-            curr.execute("DELETE FROM histroy WHERE name = ? AND created_at = ?;", (name, created_at))
+            curr.execute("DELETE FROM history WHERE name = ? AND created_at = ?;", (name, created_at))
 
     def save_messages(self, name: str, messages: list[dict[str, str]]) -> None:
         with self.database() as curr:
             curr.execute("INSERT INTO history (name, messages) VALUES (?, ?);", (name, json.dumps(messages)))
 
-    def get_a_message(self, name: str, created_at: str) -> list[dict[str, str]]:
+    def get_single_messages(self, name: str, created_at: str | None = None) -> list[dict[str, str]]:
         with self.database() as curr:
-            curr.execute("SELECT messages FROM history WHERE name = ? AND created_at = ?;", (name, created_at))
+            if created_at:
+                curr.execute("SELECT messages FROM history WHERE name = ? AND created_at = ?;", (name, created_at))
+            else:
+                curr.execute("SELECT messages FROM history WHERE name = ?;", (name,))
 
             messages = curr.fetchone()
 
         if not messages:
             raise Exception("Message does not exist.")
 
-        print(json.loads(messages[0]))
+        return json.loads(messages[0])
 
     def get_all_messages(self):
         with self.database() as curr:

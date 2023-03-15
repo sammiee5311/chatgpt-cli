@@ -4,6 +4,7 @@ line-length = 120
 [tool.pytest.ini_options]
 env = [
   "OPENAPI_KEY=OPENAPI_KEY",
+  "DB_FILE=./tests/history.sqlite3",
 ]
 
 [tool.mypy]
