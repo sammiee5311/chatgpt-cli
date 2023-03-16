@@ -77,7 +77,7 @@ class History:
         if not messages:
             raise Exception("Message does not exist.")
 
-        return cast(list[dict[str, str]], json.loads(messages[0]))
+        return cast("list[dict[str, str]]", json.loads(messages[0]))
 
     def get_all_messages(self) -> list[tuple[str, str]]:
         with self.database() as curr:
