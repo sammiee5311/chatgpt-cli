@@ -26,7 +26,7 @@ def test_save_messages_not_exist(history_model: History) -> None:
         history_model.get_single_messages("test2")
 
 
-def test_create_history(history_model: History) -> None:
+def test_delete_history(history_model: History) -> None:
     fetched_messages = history_model.get_all_messages()
     created_at = fetched_messages[0][1]
     history_model.delete_messages("test", created_at)

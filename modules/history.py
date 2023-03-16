@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import json
 import os
 import sqlite3
 from sqlite3 import Cursor
 from types import TracebackType
-from typing import Optional
+from typing import cast
 from typing import Type
 
 from utils.log import logger
@@ -21,17 +23,20 @@ class Database:
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_inst: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> bool:
-        logger.debug("commiting...")
-        self.conn.commit()
+        exc_type: Type[BaseException] | None = None,
+        exc_inst: BaseException | None = None,
+        exc_tb: TracebackType | None = None,
+    ) -> None:
+        if exc_type is not None:
+            self.conn.rollback()
+        else:
+            self.conn.commit()
+            logger.debug("commiting...")
         self.conn.close()
 
 
 class History:
-    def __init__(self, database: Database):
+    def __init__(self, database: Type[Database]):
         self.database = database
         self.init_history()
 
@@ -52,7 +57,7 @@ class History:
                 "CREATE TABLE history (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), messages BLOB, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
             )
 
-    def delete_messages(self, name: str, created_at) -> None:
+    def delete_messages(self, name: str, created_at: str) -> None:
         with self.database() as curr:
             curr.execute("DELETE FROM history WHERE name = ? AND created_at = ?;", (name, created_at))
 
@@ -72,9 +77,9 @@ class History:
         if not messages:
             raise Exception("Message does not exist.")
 
-        return json.loads(messages[0])
+        return cast(list[dict[str, str]], json.loads(messages[0]))
 
-    def get_all_messages(self):
+    def get_all_messages(self) -> list[tuple[str, str]]:
         with self.database() as curr:
             curr.execute("SELECT name, created_at FROM history;")
             fetched_messages = curr.fetchall()
