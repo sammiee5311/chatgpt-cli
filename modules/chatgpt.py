@@ -64,6 +64,12 @@ class ChatGPT:
         if self.is_turbo:
             self.messages = [{"role": "system", "content": "You are a helpful assistant."}]
 
+    def set_messages(self, messages: list[dict[str, str]]) -> None:
+        self.messages = messages
+
+    def get_messages(self) -> list[dict[str, str]]:
+        return self.messages
+
     def parse_choice_from_response(self, response: ChatGPTResponse) -> Choice:
         if not response.choices:
             raise ChatGPTExecption("Open AI did not respond output from your question. Please try again.")

@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Generator
 from typing import TypeVar
 
+import mock
 import pytest
 
 from modules.history import Database
@@ -24,3 +25,9 @@ def history_model() -> YieldFixture[History]:
     history.save_messages("test", [{"role": "system", "content": "It is a test."}])
     yield history
     db_file.unlink()
+
+
+@pytest.fixture
+def fake_input(input_value: str = "test") -> YieldFixture[str]:
+    with mock.patch("builtins.input"):
+        yield input_value
