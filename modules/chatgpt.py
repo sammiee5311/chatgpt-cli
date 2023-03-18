@@ -54,15 +54,19 @@ class ChatGPTResponse:
 
 
 class ChatGPT:
-    def __init__(self, model: ChatGPTModel) -> None:
+    def __init__(self, model: ChatGPTModel, paid: bool = False) -> None:
         self.model = model
+        self.is_paid = paid
         self.check_turbo_model()
 
     def check_turbo_model(self) -> None:
         self.is_turbo = self.model.__class__.__name__ == Turbo.__name__
 
         if self.is_turbo:
-            self.messages = [{"role": "system", "content": "You are a helpful assistant."}]
+            self.reset_messages()
+
+    def reset_messages(self) -> None:
+        self.messages = [{"role": "system", "content": "You are a helpful assistant."}]
 
     def set_messages(self, messages: list[dict[str, str]]) -> None:
         self.messages = messages
@@ -76,7 +80,20 @@ class ChatGPT:
 
         return response.choices[0]
 
+    def sanitize_message_from_choice(self, choice: Choice) -> str:
+        if not choice and not "message" in choice:
+            raise ChatGPTExecption("Something went wrong.")
+
+        if isinstance(choice["message"], dict) and isinstance(choice["message"]["content"], str):
+            self.messages.append(choice["message"])
+            response_text = choice["message"]["content"].strip()
+
+        return response_text
+
     def send_question_with_turbo_model(self, text: str) -> str:
+        if self.is_paid:
+            self.reset_messages()
+
         self.messages.append({"role": "user", "content": text})
 
         response = openai.ChatCompletion.create(  # type: ignore
@@ -84,13 +101,7 @@ class ChatGPT:
         )
 
         choice = self.parse_choice_from_response(response)
-
-        if not choice and not "message" in choice:
-            raise ChatGPTExecption("Something went wrong.")
-
-        if isinstance(choice["message"], dict) and isinstance(choice["message"]["content"], str):
-            self.messages.append(choice["message"])
-            response_text = choice["message"]["content"].strip()
+        response_text = self.sanitize_message_from_choice(choice)
 
         return response_text
 

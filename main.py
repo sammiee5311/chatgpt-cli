@@ -18,6 +18,12 @@ def main() -> None:
         help="Ask continuous questions to ChatGPT.",
     )
     parser.add_argument(
+        "--paid",
+        dest="paid",
+        action="store_true",
+        help="Use paid version.",
+    )
+    parser.add_argument(
         "-m",
         "--model",
         dest="model",
@@ -29,10 +35,13 @@ def main() -> None:
 
     model: ChatGPTModel = ChatGPTModels[args.model.upper()].value()
     continuous: bool = args.continuous
+    paid: bool = args.paid
 
-    print(f"You choose {model} model and {'continuous mode' if continuous else 'single mode'}.")
+    print(
+        f"You choose {model} model, {'continuous mode' if continuous else 'single mode'} and {'paid version' if paid else 'free version'}."
+    )
 
-    start_asking(model, continuous)
+    start_asking(model, continuous, paid)
 
 
 if __name__ == "__main__":

@@ -83,8 +83,8 @@ def continuous_mode(chatgpt: ChatGPT) -> None:
         pprint.pprint(response_text)
 
 
-def start_asking(model: ChatGPTModel, continuous: bool) -> None:
-    chatgpt = ChatGPT(model)
+def start_asking(model: ChatGPTModel, continuous: bool, paid: bool) -> None:
+    chatgpt = ChatGPT(model, paid)
 
     if continuous:
         continuous_mode(chatgpt)

@@ -2,10 +2,9 @@ import mock
 import pytest
 from pytest import CaptureFixture
 
-from mode import continuous_mode
 from mode import single_mode
 from modules.chatgpt import ChatGPT
-from tests.test_chagpt import completion_mock_response
+from tests.test_chatgpt import completion_mock_response
 from utils.model import Davinci
 
 
