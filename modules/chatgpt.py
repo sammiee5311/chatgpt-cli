@@ -8,9 +8,9 @@ from typing import Union
 import openai
 from dotenv import load_dotenv
 
+from modules.models import ChatGPTModel
+from modules.models import Turbo
 from utils.exceptions import ChatGPTExecption
-from utils.model import ChatGPTModel
-from utils.model import Turbo
 
 load_dotenv(dotenv_path=".env")
 

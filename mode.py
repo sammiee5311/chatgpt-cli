@@ -5,8 +5,8 @@ import pprint
 from modules.chatgpt import ChatGPT
 from modules.history import Database
 from modules.history import History
+from modules.models import ChatGPTModel
 from utils.exceptions import InputException
-from utils.model import ChatGPTModel
 
 
 def delete_history(history: History) -> None:

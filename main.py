@@ -3,8 +3,8 @@ from __future__ import annotations
 from argparse import ArgumentParser
 
 from mode import start_asking
-from utils.model import ChatGPTModel
-from utils.model import ChatGPTModels
+from modules.models import ChatGPTModel
+from modules.models import ChatGPTModels
 
 models = list(map(lambda name: name.lower(), ChatGPTModels._member_names_))
 

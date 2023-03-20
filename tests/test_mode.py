@@ -4,8 +4,8 @@ from pytest import CaptureFixture
 
 from mode import single_mode
 from modules.chatgpt import ChatGPT
+from modules.models import Davinci
 from tests.test_chatgpt import completion_mock_response
-from utils.model import Davinci
 
 
 @mock.patch("openai.Completion.create", completion_mock_response)

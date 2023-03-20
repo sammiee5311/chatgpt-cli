@@ -9,9 +9,9 @@ import mock
 import pytest
 
 from modules.chatgpt import ChatGPT
+from modules.models import Davinci
+from modules.models import Turbo
 from utils.exceptions import ChatGPTExecption
-from utils.model import Davinci
-from utils.model import Turbo
 
 
 @dataclass
