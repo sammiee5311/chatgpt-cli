@@ -1,131 +1,97 @@
 from __future__ import annotations
 
 import pprint
+import sys
+from typing import Callable
 
 from modules.chatgpt import ChatGPT
 from modules.history import Database
 from modules.history import History
-from modules.models import ChatGPTModel
 from utils.exceptions import InputException
 
 
-def delete_history(history: History) -> None:
-    while True:
-        try:
-            print("##### DELETION #####")
-            all_messages = history.get_all_messages()
-            show_all_messages(all_messages)
-            idx = sanitize_input_data(input("choose: "), len(all_messages))
+class Single:
+    def __init__(self, chatgpt: ChatGPT) -> None:
+        self.chatgpt = chatgpt
 
-            if idx == -1:
-                break
-
-            name, created_at = all_messages[idx]
-            history.delete_messages(name, created_at)
-        except InputException:
-            print("Please, choose correct number which is one of the numbers next to data.")
-
-
-def init_turbo(chatgpt: ChatGPT, history: History) -> None:
-    print(
-        """## Choose option ##
-Delete history [1]
-Start asking [2]
-Exit [0]"""
-    )
-    while True:
-        try:
-            idx = sanitize_input_data(input("choose: "), 2)
-
-            if idx == -1:
-                raise SystemExit()
-            break
-        except InputException:
-            print("Please, choose correct number which is one of the numbers next to data.")
-
-    if idx == 0:
-        delete_history(history)
-
-    activate_history(chatgpt, history)
-
-
-def show_all_messages(all_messages: list[tuple[str, str]]) -> None:
-    print(f"## Choose history ##")
-    for idx, (name, created_at) in enumerate(all_messages):
-        print(f"{name} - {created_at} [{idx+1}]")
-    print("I don't want to choose [0]")
-
-
-def sanitize_input_data(input_data: str, number_of_data: int) -> int:
-    if not input_data.isdigit() or not (0 <= int(input_data) <= number_of_data):
-        raise InputException()
-
-    return int(input_data) - 1
-
-
-def single_mode(chatgpt: ChatGPT) -> None:
-    question = input("Question: ")
-    response_text = chatgpt.ask(question)
-
-    pprint.pprint(response_text)
-
-
-def activate_history(chatgpt: ChatGPT, history: History) -> None:
-    all_messages = history.get_all_messages()
-
-    if len(all_messages) > 0:
-        print("### START ASKING ###")
-        show_all_messages(all_messages)
-        while True:
-            try:
-                idx = sanitize_input_data(input("choose: "), len(all_messages))
-
-                if idx == -1:
-                    return
-                break
-            except InputException:
-                print("Please, choose correct number which is one of the numbers next to data.")
-
-        name, created_at = all_messages[idx]
-        messages = history.get_single_messages(name, created_at)
-        chatgpt.set_messages(messages)
-
-
-def process_save_history(history: History, messages: list[dict[str, str]]) -> None:
-    answer = input("Do you want to save message history? [y/n]")
-
-    if answer == "y":
-        while True:
-            name = input("Choose name of the history: ").strip()
-
-            if len(name) < 1:
-                print("Name of the history cannot be empty string.")
-                continue
-            break
-
-        history.save_messages(name, messages)
-
-
-def continuous_mode(chatgpt: ChatGPT) -> None:
-    if chatgpt.is_turbo:
-        history = History(Database)
-        init_turbo(chatgpt, history)
-
-    while True:
+    def run(self) -> None:
         question = input("Question: ")
-        if question == "exit":
-            if chatgpt.is_turbo:
-                process_save_history(history, chatgpt.get_messages())
-            break
-
-        response_text = chatgpt.ask(question)
+        response_text = self.chatgpt.ask(question)
         pprint.pprint(response_text)
 
 
-def start_asking(model: ChatGPTModel, continuous: bool, paid: bool) -> None:
-    chatgpt = ChatGPT(model, paid)
+class Continuous:
+    def __init__(self, chatgpt: ChatGPT) -> None:
+        self.chatgpt = chatgpt
+        self.history = History(Database)
+        if self.chatgpt.is_turbo:
+            self.init_turbo()
 
-    if continuous:
-        continuous_mode(chatgpt)
-    else:
-        single_mode(chatgpt)
+    def run(self) -> None:
+        while True:
+            question = input("Question: ")
+            if question == "exit":
+                if self.chatgpt.is_turbo:
+                    self.process_save_history(self.chatgpt.get_messages())
+                break
+
+            response_text = self.chatgpt.ask(question)
+            pprint.pprint(response_text)
+
+    def get_input(
+        self,
+        prompt: str,
+        validator: Callable[[str], bool],
+        error_message: str = "Please, choose correct number which is one of the numbers next to data.",
+    ) -> str:
+        input_data = input(prompt)
+        try:
+            if not validator(input_data):
+                raise InputException()
+            return input_data
+        except InputException:
+            print(error_message)
+            return self.get_input(prompt, validator)
+
+    def init_turbo(self) -> None:
+        options = {"1": self.delete_history, "2": self.activate_history, "0": lambda: sys.exit()}
+        print("## Choose option ##\nDelete history [1]\nStart asking [2]\nExit [0]")
+        idx = self.get_input("choose: ", lambda x: int(x) in range(3))
+        options[idx]()
+
+    def delete_history(self) -> None:
+        print("##### DELETION #####")
+        all_messages = self.history.get_all_messages()
+        self.show_all_messages(all_messages)
+
+        idx = self.get_input("choose: ", lambda x: x.isdigit() and int(x) in range(len(all_messages) + 1))
+
+        if idx != "0":
+            name, created_at = all_messages[int(idx) - 1]
+            self.history.delete_messages(name, created_at)
+
+    def show_all_messages(self, all_messages: list[tuple[str, str]]) -> None:
+        print("## Choose history ##")
+        for idx, (name, created_at) in enumerate(all_messages):
+            print(f"{name} - {created_at} [{idx+1}]")
+        print("I don't want to choose [0]")
+
+    def activate_history(self) -> None:
+        all_messages = self.history.get_all_messages()
+
+        if len(all_messages) > 0:
+            print("### START ASKING ###")
+            self.show_all_messages(all_messages)
+
+            idx = self.get_input("choose: ", lambda x: x.isdigit() and int(x) in range(len(all_messages) + 1))
+
+            if idx != "0":
+                name, created_at = all_messages[int(idx) - 1]
+                messages = self.history.get_single_messages(name, created_at)
+                self.chatgpt.set_messages(messages)
+
+    def process_save_history(self, messages: list[dict[str, str]]) -> None:
+        answer = input("Do you want to save message history? [y/n]")
+        if answer == "y":
+            name = self.get_input("Choose name of the history: ", lambda x: len(x.strip()) > 0, "Name cannot be empty.")
+            self.history.save_messages(name, messages)

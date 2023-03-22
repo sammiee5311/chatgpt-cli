@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from argparse import ArgumentParser
 
-from mode import start_asking
+from mode import Continuous
+from mode import Single
+from modules.chatgpt import ChatGPT
+from modules.history import Database
+from modules.history import History
 from modules.models import ChatGPTModel
 from modules.models import ChatGPTModels
 
@@ -41,7 +45,10 @@ def main() -> None:
         f"You choose {model} model, {'continuous mode' if continuous else 'single mode'} and {'paid version' if paid else 'free version'}."
     )
 
-    start_asking(model, continuous, paid)
+    chatgpt = ChatGPT(model, paid)
+
+    mode: Continuous | Single = Continuous(chatgpt) if continuous else Single(chatgpt)
+    mode.run()
 
 
 if __name__ == "__main__":

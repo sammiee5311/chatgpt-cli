@@ -1,8 +1,7 @@
 import mock
-import pytest
 from pytest import CaptureFixture
 
-from mode import single_mode
+from mode import Single
 from modules.chatgpt import ChatGPT
 from modules.models import Davinci
 from tests.test_chatgpt import completion_mock_response
@@ -11,7 +10,8 @@ from tests.test_chatgpt import completion_mock_response
 @mock.patch("openai.Completion.create", completion_mock_response)
 def test_single_mode(capsys: CaptureFixture[str], fake_input: str) -> None:
     chatgpt = ChatGPT(Davinci())
-    single_mode(chatgpt)
+    mode = Single(chatgpt)
+    mode.run()
 
     captured = capsys.readouterr()
     response = completion_mock_response()
