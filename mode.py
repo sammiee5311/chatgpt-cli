@@ -5,7 +5,6 @@ import sys
 from typing import Callable
 
 from modules.chatgpt import ChatGPT
-from modules.history import Database
 from modules.history import History
 from utils.exceptions import InputException
 
@@ -33,31 +32,10 @@ class Continuous:
             response_text = self.chatgpt.ask(question)
             pprint.pprint(response_text)
 
-    def get_input(
-        self,
-        prompt: str,
-        validator: Callable[[str], bool],
-        error_message: str = "Please, choose correct number which is one of the numbers next to data.",
-    ) -> str:
-        input_data = input(prompt)
-        try:
-            if not validator(input_data):
-                raise InputException()
-            return input_data
-        except InputException:
-            print(error_message)
-            return self.get_input(prompt, validator)
 
-    def show_all_messages(self, all_messages: list[tuple[str, str]]) -> None:
-        print("## Choose history ##")
-        for idx, (name, created_at) in enumerate(all_messages):
-            print(f"{name} - {created_at} [{idx+1}]")
-        print("I don't want to choose [0]")
-
-
-class ContinuousWithHistory(Continuous):
+class ContinuousWithHistory:
     def __init__(self, chatgpt: ChatGPT, history: History):
-        super().__init__(chatgpt)
+        self.chatgpt = chatgpt
         self.history = history
         self.init_turbo()
 
@@ -76,6 +54,21 @@ class ContinuousWithHistory(Continuous):
 
             response_text = self.chatgpt.ask(question)
             pprint.pprint(response_text)
+
+    def get_input(
+        self,
+        prompt: str,
+        validator: Callable[[str], bool],
+        error_message: str = "Please, choose correct number which is one of the numbers next to data.",
+    ) -> str:
+        input_data = input(prompt)
+        try:
+            if not validator(input_data):
+                raise InputException()
+            return input_data
+        except InputException:
+            print(error_message)
+            return self.get_input(prompt, validator)
 
     def activate_history(self) -> None:
         all_messages = self.history.get_all_messages()
@@ -96,6 +89,12 @@ class ContinuousWithHistory(Continuous):
         if answer == "y":
             name = self.get_input("Choose name of the history: ", lambda x: len(x.strip()) > 0, "Name cannot be empty.")
             self.history.save_messages(name, messages)
+
+    def show_all_messages(self, all_messages: list[tuple[str, str]]) -> None:
+        print("## Choose history ##")
+        for idx, (name, created_at) in enumerate(all_messages):
+            print(f"{name} - {created_at} [{idx+1}]")
+        print("I don't want to choose [0]")
 
     def delete_history(self) -> None:
         print("##### DELETION #####")
