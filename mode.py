@@ -23,16 +23,11 @@ class Single:
 class Continuous:
     def __init__(self, chatgpt: ChatGPT) -> None:
         self.chatgpt = chatgpt
-        self.history = History(Database)
-        if self.chatgpt.is_turbo:
-            self.init_turbo()
 
     def run(self) -> None:
         while True:
             question = input("Question: ")
             if question == "exit":
-                if self.chatgpt.is_turbo:
-                    self.process_save_history(self.chatgpt.get_messages())
                 break
 
             response_text = self.chatgpt.ask(question)
@@ -53,28 +48,34 @@ class Continuous:
             print(error_message)
             return self.get_input(prompt, validator)
 
+    def show_all_messages(self, all_messages: list[tuple[str, str]]) -> None:
+        print("## Choose history ##")
+        for idx, (name, created_at) in enumerate(all_messages):
+            print(f"{name} - {created_at} [{idx+1}]")
+        print("I don't want to choose [0]")
+
+
+class ContinuousWithHistory(Continuous):
+    def __init__(self, chatgpt: ChatGPT, history: History):
+        super().__init__(chatgpt)
+        self.history = history
+        self.init_turbo()
+
     def init_turbo(self) -> None:
         options = {"1": self.delete_history, "2": self.activate_history, "0": lambda: sys.exit()}
         print("## Choose option ##\nDelete history [1]\nStart asking [2]\nExit [0]")
         idx = self.get_input("choose: ", lambda x: int(x) in range(3))
         options[idx]()
 
-    def delete_history(self) -> None:
-        print("##### DELETION #####")
-        all_messages = self.history.get_all_messages()
-        self.show_all_messages(all_messages)
+    def run(self) -> None:
+        while True:
+            question = input("Question: ")
+            if question == "exit":
+                self.process_save_history(self.chatgpt.get_messages())
+                break
 
-        idx = self.get_input("choose: ", lambda x: x.isdigit() and int(x) in range(len(all_messages) + 1))
-
-        if idx != "0":
-            name, created_at = all_messages[int(idx) - 1]
-            self.history.delete_messages(name, created_at)
-
-    def show_all_messages(self, all_messages: list[tuple[str, str]]) -> None:
-        print("## Choose history ##")
-        for idx, (name, created_at) in enumerate(all_messages):
-            print(f"{name} - {created_at} [{idx+1}]")
-        print("I don't want to choose [0]")
+            response_text = self.chatgpt.ask(question)
+            pprint.pprint(response_text)
 
     def activate_history(self) -> None:
         all_messages = self.history.get_all_messages()
@@ -95,3 +96,14 @@ class Continuous:
         if answer == "y":
             name = self.get_input("Choose name of the history: ", lambda x: len(x.strip()) > 0, "Name cannot be empty.")
             self.history.save_messages(name, messages)
+
+    def delete_history(self) -> None:
+        print("##### DELETION #####")
+        all_messages = self.history.get_all_messages()
+        self.show_all_messages(all_messages)
+
+        idx = self.get_input("choose: ", lambda x: x.isdigit() and int(x) in range(len(all_messages) + 1))
+
+        if idx != "0":
+            name, created_at = all_messages[int(idx) - 1]
+            self.history.delete_messages(name, created_at)

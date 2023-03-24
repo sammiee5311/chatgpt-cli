@@ -3,6 +3,7 @@ from __future__ import annotations
 from argparse import ArgumentParser
 
 from mode import Continuous
+from mode import ContinuousWithHistory
 from mode import Single
 from modules.chatgpt import ChatGPT
 from modules.history import Database
@@ -45,9 +46,14 @@ def main() -> None:
         f"You choose {model} model, {'continuous mode' if continuous else 'single mode'} and {'paid version' if paid else 'free version'}."
     )
 
+    mode: Continuous | ContinuousWithHistory | Single
     chatgpt = ChatGPT(model, paid)
 
-    mode: Continuous | Single = Continuous(chatgpt) if continuous else Single(chatgpt)
+    if continuous:
+        mode = ContinuousWithHistory(chatgpt, History(Database)) if chatgpt.is_turbo else Continuous(chatgpt)
+    else:
+        mode = Single(chatgpt)
+
     mode.run()
 
 
