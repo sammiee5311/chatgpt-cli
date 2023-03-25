@@ -105,7 +105,7 @@ class ChatGPT:
 
         return response_text
 
-    def send_question_to_others_models(self, text: str) -> str:
+    def send_question_with_others_models(self, text: str) -> str:
         response = openai.Completion.create(  # type: ignore
             engine=self.model.name,
             prompt=text,
@@ -125,7 +125,7 @@ class ChatGPT:
 
     def ask(self, text: str) -> str:
         response_text = (
-            self.send_question_with_turbo_model(text) if self.is_turbo else self.send_question_to_others_models(text)
+            self.send_question_with_turbo_model(text) if self.is_turbo else self.send_question_with_others_models(text)
         )
 
         return response_text
