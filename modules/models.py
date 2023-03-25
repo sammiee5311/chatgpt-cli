@@ -63,3 +63,10 @@ class ChatGPTModels(Enum):
     CURIE = Curie
     BABBAGE = Babbage
     ADA = Ada
+
+
+class WhisperModels(Enum):
+    WHISPER1 = "whisper-1"
+
+    def __str__(self) -> str:
+        return self.value
