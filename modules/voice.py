@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import TypedDict
 
@@ -7,7 +8,7 @@ from modules.models import WhisperModels
 from utils.exceptions import WhisperException
 
 SUPPORTED_FILE_TYPES = frozenset([".mp3", ".mp4", ".mpeg", ".mpga", ".m4a", ".wav", ".webm"])
-LIMIT_FILE_SIZE = 26_214_400  # < 25MB
+LIMIT_FILE_SIZE = int(os.environ.get("LIMIT_FILE_SIZE", 26_214_400))  # < 25MB
 
 
 class WhisperResult(TypedDict):
