@@ -10,6 +10,8 @@ import pytest
 
 from modules.history import Database
 from modules.history import History
+from modules.models import WhisperModels
+from modules.voice import Voice
 
 T = TypeVar("T")
 
@@ -31,6 +33,13 @@ def history_model() -> YieldFixture[History]:
     history.save_messages("test", [{"role": "system", "content": "It is a test."}])
     yield history
     db_file.unlink()
+
+
+@pytest.fixture()
+def voice_model() -> YieldFixture[Voice]:
+    model = WhisperModels.WHISPER1
+    voice = Voice(model)
+    yield voice
 
 
 @pytest.fixture(scope="function")
