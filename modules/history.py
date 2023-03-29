@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-import json
 import os
 import sqlite3
 from sqlite3 import Cursor
 from types import TracebackType
 from typing import cast
 from typing import Type
+
+import orjson
 
 from utils.log import logger
 
@@ -65,7 +66,7 @@ class History:
 
     def save_messages(self, name: str, messages: list[dict[str, str]]) -> None:
         with self.database() as curr:
-            curr.execute("INSERT INTO history (name, messages) VALUES (?, ?);", (name, json.dumps(messages)))
+            curr.execute("INSERT INTO history (name, messages) VALUES (?, ?);", (name, orjson.dumps(messages)))
         logger.info(f"{name} has been saved.")
 
     def get_single_messages(self, name: str, created_at: str | None = None) -> list[dict[str, str]]:
@@ -80,7 +81,7 @@ class History:
         if not messages:
             raise Exception("Message does not exist.")
 
-        return cast("list[dict[str, str]]", json.loads(messages[0]))
+        return cast("list[dict[str, str]]", orjson.loads(messages[0]))
 
     def get_all_messages(self) -> list[tuple[str, str]]:
         with self.database() as curr:

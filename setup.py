@@ -24,6 +24,7 @@ if __name__ == "__main__":
         install_requires=[
             "python-dotenv",
             "openai",
+            "orjson",
         ],
         extras_require={"dev": dev_requires},
     )
