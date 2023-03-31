@@ -91,7 +91,7 @@ class ChatGPT:
         return response_text
 
     def send_question_with_turbo_model(self, text: str) -> str:
-        if self.is_paid:
+        if not self.is_paid:
             self.reset_messages()
 
         self.messages.append({"role": "user", "content": text})
