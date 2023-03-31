@@ -10,3 +10,4 @@ tox
 requests-mock
 mock
 httpx
+orjson
