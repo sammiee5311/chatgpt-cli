@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 from modules.models import ChatGPTModel
 from modules.models import Turbo
+from modules.voice import Voice
 from utils.exceptions import ChatGPTExecption
 
 load_dotenv(dotenv_path=".env")
@@ -54,9 +55,10 @@ class ChatGPTResponse:
 
 
 class ChatGPT:
-    def __init__(self, model: ChatGPTModel, paid: bool = False) -> None:
+    def __init__(self, model: ChatGPTModel, voice: Voice | None = None, paid: bool = False) -> None:
         self.model = model
         self.is_paid = paid
+        self.voice = voice
         self.check_turbo_model()
 
     def check_turbo_model(self) -> None:
@@ -103,6 +105,9 @@ class ChatGPT:
         choice = self.parse_choice_from_response(response)
         response_text = self.sanitize_message_from_choice(choice)
 
+        if self.voice:
+            self.voice.speak(response_text)
+
         return response_text
 
     def send_question_with_others_models(self, text: str) -> str:
@@ -120,6 +125,9 @@ class ChatGPT:
 
         if "text" in choice and isinstance(choice["text"], str):
             response_text = choice["text"].strip()
+
+        if self.voice:
+            self.voice.speak(response_text)
 
         return response_text
 

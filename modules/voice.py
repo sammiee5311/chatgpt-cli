@@ -3,12 +3,17 @@ from pathlib import Path
 from typing import TypedDict
 
 import openai
+from gtts import gTTS
+from pydub import AudioSegment
+from pydub.playback import play
 
 from modules.models import WhisperModels
 from utils.exceptions import WhisperException
 
 SUPPORTED_FILE_TYPES = frozenset([".mp3", ".mp4", ".mpeg", ".mpga", ".m4a", ".wav", ".webm"])
 LIMIT_FILE_SIZE = int(os.environ.get("LIMIT_FILE_SIZE", 26_214_400))  # < 25MB
+VOICE_FILE = "./voice.mp3"
+VOICE_PATH = Path(VOICE_FILE)
 
 
 class WhisperResult(TypedDict):
@@ -18,6 +23,22 @@ class WhisperResult(TypedDict):
 class Voice:
     def __init__(self, model: WhisperModels):
         self.model = model
+
+    @classmethod
+    def speak(self, text: str) -> None:
+        self.save_as_voice_file_with_gtts(text)
+        self.play_voice_file()
+        VOICE_PATH.unlink()
+
+    @classmethod
+    def save_as_voice_file_with_gtts(self, text: str) -> None:
+        audio = gTTS(text=text, lang="en", slow=False)
+        audio.save(str(VOICE_PATH))
+
+    @classmethod
+    def play_voice_file(self) -> None:
+        voice_text = AudioSegment.from_mp3(str(VOICE_FILE))
+        play(voice_text)
 
     def is_supported_audio_file_type(self, audio_file: Path) -> bool:
         return audio_file.suffix in SUPPORTED_FILE_TYPES

@@ -10,6 +10,8 @@ from modules.history import Database
 from modules.history import History
 from modules.models import ChatGPTModel
 from modules.models import ChatGPTModels
+from modules.models import WhisperModels
+from modules.voice import Voice
 
 models = list(map(lambda name: name.lower(), ChatGPTModels._member_names_))
 
@@ -36,18 +38,33 @@ def main() -> None:
         choices=models,
         help=f"Please choose one of the {models} models. (Default is 'Davinci' model)",
     )
+    parser.add_argument(
+        "--voice",
+        dest="voice",
+        action="store_true",
+        help="Enable voice assistant.",
+    )
     args = parser.parse_args()
 
     model: ChatGPTModel = ChatGPTModels[args.model.upper()].value()
     continuous: bool = args.continuous
     paid: bool = args.paid
+    is_enable_voice_assistant: bool = args.voice
+    voice_assistant: Voice | None = None
 
     print(
-        f"You choose {model} model, {'continuous mode' if continuous else 'single mode'} and {'paid version' if paid else 'free version'}."
+        f"""You choose
+- {model} model
+- {'continuous mode' if continuous else 'single mode'}
+- {'paid version' if paid else 'free version'}
+- {'enabled' if is_enable_voice_assistant else 'disabled'} voice assistant""".strip()
     )
 
+    if is_enable_voice_assistant:
+        voice_assistant = Voice(WhisperModels.WHISPER1)
+
     mode: Continuous | ContinuousWithHistory | Single
-    chatgpt = ChatGPT(model, paid)
+    chatgpt = ChatGPT(model, voice_assistant, paid)
 
     if continuous:
         mode = ContinuousWithHistory(chatgpt, History(Database)) if chatgpt.is_turbo else Continuous(chatgpt)

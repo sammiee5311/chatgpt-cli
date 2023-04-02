@@ -25,6 +25,8 @@ if __name__ == "__main__":
             "python-dotenv",
             "openai",
             "orjson",
+            "gTTS",
+            "pydub",
         ],
         extras_require={"dev": dev_requires},
     )

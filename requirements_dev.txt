@@ -11,3 +11,5 @@ requests-mock
 mock
 httpx
 orjson
+gTTS
+pydub
