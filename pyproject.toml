@@ -5,7 +5,8 @@ line-length = 120
 env = [
   "OPENAPI_KEY=OPENAPI_KEY",
   "DB_FILE=./tests/history.sqlite3",
-  "LIMIT_FILE_SIZE=5"
+  "LIMIT_FILE_SIZE=5",
+  "VOICE_FILE=./tests/voice.mp3"
 ]
 
 [tool.mypy]

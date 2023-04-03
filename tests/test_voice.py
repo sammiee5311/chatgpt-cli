@@ -16,12 +16,25 @@ def transcribe_mock_result(model: str, file: BufferedReader) -> WhisperResult:
     return WhisperResult(text="Hello")
 
 
+def play_mock() -> None:
+    ...
+
+
 def test_create_voice(voice_model: Voice) -> None:
     assert voice_model.model == WhisperModels.WHISPER1
 
 
 @mock.patch("openai.Audio.transcribe", transcribe_mock_result)
 def test_voice_file_success(voice_model: Voice, voice_files: dict[str, str]) -> None:
+    result = voice_model.get_text_from_audio(voice_files["mp3"])
+
+    assert result == "Hello"
+
+
+@mock.patch("modules.voice.Voice.play_voice_file", play_mock)
+@mock.patch("openai.Audio.transcribe", transcribe_mock_result)
+def test_voice_file_with_speak(voice_model: Voice, voice_files: dict[str, str]) -> None:
+    voice_model.speak("Hello")
     result = voice_model.get_text_from_audio(voice_files["mp3"])
 
     assert result == "Hello"
