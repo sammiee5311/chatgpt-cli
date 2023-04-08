@@ -34,11 +34,12 @@ def main() -> None:
         "-m",
         "--model",
         dest="model",
-        default="davinci",
+        default="turbo",
         choices=models,
         help=f"Please choose one of the {models} models. (Default is 'Davinci' model)",
     )
     parser.add_argument(
+        "-v",
         "--voice",
         dest="voice",
         action="store_true",
