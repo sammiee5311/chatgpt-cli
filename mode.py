@@ -13,24 +13,24 @@ class Single:
     def __init__(self, chatgpt: ChatGPT) -> None:
         self.chatgpt = chatgpt
 
-    def run(self) -> None:
+    async def run(self) -> None:
         question = input("Question: ")
-        response_text = self.chatgpt.ask(question)
-        pprint.pprint(response_text)
+        response_text = await self.chatgpt.ask(question)
+        print(f"\nChatGPT: {response_text}")
 
 
 class Continuous:
     def __init__(self, chatgpt: ChatGPT) -> None:
         self.chatgpt = chatgpt
 
-    def run(self) -> None:
+    async def run(self) -> None:
         while True:
             question = input("Question: ")
             if question == "exit":
                 break
 
-            response_text = self.chatgpt.ask(question)
-            pprint.pprint(response_text)
+            response_text = await self.chatgpt.ask(question)
+            print(f"\nChatGPT: {response_text}")
 
 
 class ContinuousWithHistory:
@@ -45,15 +45,15 @@ class ContinuousWithHistory:
         idx = self.get_input("choose: ", lambda x: int(x) in range(3))
         options[idx]()
 
-    def run(self) -> None:
+    async def run(self) -> None:
         while True:
             question = input("Question: ")
             if question == "exit":
                 self.process_save_history(self.chatgpt.get_messages())
                 break
 
-            response_text = self.chatgpt.ask(question)
-            pprint.pprint(response_text)
+            response_text = await self.chatgpt.ask(question)
+            print(f"\nChatGPT: {response_text}")
 
     def get_input(
         self,

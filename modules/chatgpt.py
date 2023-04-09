@@ -1,7 +1,12 @@
 from __future__ import annotations
 
 import os
+import sys
+from asyncio import create_task
+from asyncio import get_event_loop
+from asyncio import sleep
 from dataclasses import dataclass
+from functools import partial
 from typing import Dict
 from typing import Union
 
@@ -54,6 +59,20 @@ class ChatGPTResponse:
     usage: Usage
 
 
+async def print_waiting_text(second: int) -> None:
+    message = f"\rWaiting a response from ChatGPT{'.' * (second % 3 + 1)}"
+    print(message, end="", flush=True)
+    await sleep(0.5)
+
+
+async def print_waiting_prompt() -> None:
+    second = 0
+
+    while True:
+        await print_waiting_text(second)
+        second += 1
+
+
 class ChatGPT:
     def __init__(self, model: ChatGPTModel, voice: Voice | None = None, paid: bool = False) -> None:
         self.model = model
@@ -92,31 +111,47 @@ class ChatGPT:
 
         return response_text
 
-    def send_question_with_turbo_model(self, text: str) -> str:
+    async def send_question_with_turbo_model(self, text: str) -> str:
         if not self.is_paid:
             self.reset_messages()
 
         self.messages.append({"role": "user", "content": text})
 
-        response = openai.ChatCompletion.create(  # type: ignore
-            model=self.model.name, messages=self.messages, max_tokens=self.model.token, temperature=0.5
+        waiting_response = create_task(print_waiting_prompt())
+
+        response = await get_event_loop().run_in_executor(
+            None,
+            partial(
+                openai.ChatCompletion.create,
+                model=self.model.name,
+                messages=self.messages,
+                max_tokens=self.model.token,
+                temperature=0.5,
+            ),
         )
+
+        waiting_response.cancel()
 
         choice = self.parse_choice_from_response(response)
         response_text = self.sanitize_message_from_choice(choice)
 
-        if self.voice:
-            self.voice.speak(response_text)
-
         return response_text
 
-    def send_question_with_others_models(self, text: str) -> str:
-        response = openai.Completion.create(  # type: ignore
-            engine=self.model.name,
-            prompt=text,
-            max_tokens=self.model.token,
-            temperature=0.5,
+    async def send_question_with_others_models(self, text: str) -> str:
+        waiting_response = create_task(print_waiting_prompt())
+
+        response = await get_event_loop().run_in_executor(
+            None,
+            partial(
+                openai.Completion.create,
+                engine=self.model.name,
+                prompt=text,
+                max_tokens=self.model.token,
+                temperature=0.5,
+            ),
         )
+
+        waiting_response.cancel()
 
         choice = self.parse_choice_from_response(response)
 
@@ -126,14 +161,14 @@ class ChatGPT:
         if "text" in choice and isinstance(choice["text"], str):
             response_text = choice["text"].strip()
 
-        if self.voice:
-            self.voice.speak(response_text)
-
         return response_text
 
-    def ask(self, text: str) -> str:
-        response_text = (
+    async def ask(self, text: str) -> str:
+        response_text = await (
             self.send_question_with_turbo_model(text) if self.is_turbo else self.send_question_with_others_models(text)
         )
+
+        if self.voice:
+            self.voice.speak(response_text)
 
         return response_text

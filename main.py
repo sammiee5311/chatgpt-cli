@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from argparse import ArgumentParser
 
 from mode import Continuous
@@ -16,7 +17,7 @@ from modules.voice import Voice
 models = list(map(lambda name: name.lower(), ChatGPTModels._member_names_))
 
 
-def main() -> None:
+async def main() -> None:
     parser = ArgumentParser()
     parser.add_argument(
         "--con",
@@ -72,8 +73,8 @@ def main() -> None:
     else:
         mode = Single(chatgpt)
 
-    mode.run()
+    await mode.run()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

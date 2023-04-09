@@ -5,6 +5,7 @@ dev_requires = [
     "pytest",
     "pytest-cov",
     "pytest-env",
+    "pytest-asyncio",
     "requests-mock",
     "black",
     "mypy",

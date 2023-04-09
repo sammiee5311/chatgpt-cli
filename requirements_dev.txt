@@ -1,8 +1,9 @@
-python-dotenv
-openai
 pytest
 pytest-cov
 pytest-env
+pytest-asyncio
+python-dotenv
+openai
 mypy
 black
 isort
