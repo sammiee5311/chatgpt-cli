@@ -20,7 +20,7 @@ class CompletionMockResponse:
     choices: list[dict[str, str | dict[str, str]]] = field(default_factory=list)
 
 
-def completion_mock_response(**kwgs: dict[str, Any]) -> CompletionMockResponse:
+async def completion_mock_response(**kwgs: dict[str, Any]) -> CompletionMockResponse:
     if kwgs.get("fail"):
         return CompletionMockResponse()
 
@@ -36,7 +36,7 @@ def play_mock() -> None:
 
 
 @pytest.mark.asyncio
-@mock.patch("openai.Completion.create", completion_mock_response)
+@mock.patch("openai.Completion.acreate", completion_mock_response)
 async def test_ask_success_with_davinci_model() -> None:
     chatgpt = ChatGPT(ChatGPTModels.DAVINCI.value())
     response_text = await chatgpt.ask("Hello, How are you?")
@@ -45,7 +45,7 @@ async def test_ask_success_with_davinci_model() -> None:
 
 
 @pytest.mark.asyncio
-@mock.patch("openai.Completion.create", partial(completion_mock_response, fail=True))
+@mock.patch("openai.Completion.acreate", partial(completion_mock_response, fail=True))
 async def test_ask_fail_with_davinci_model() -> None:
     chatgpt = ChatGPT(ChatGPTModels.DAVINCI.value())
     with pytest.raises(ChatGPTExecption):
@@ -53,7 +53,7 @@ async def test_ask_fail_with_davinci_model() -> None:
 
 
 @pytest.mark.asyncio
-@mock.patch("openai.ChatCompletion.create", completion_mock_response)
+@mock.patch("openai.ChatCompletion.acreate", completion_mock_response)
 async def test_ask_success_with_turbo_model() -> None:
     chatgpt = ChatGPT(ChatGPTModels.TURBO.value())
     response_text = await chatgpt.ask("Hello, How are you?")
@@ -62,7 +62,7 @@ async def test_ask_success_with_turbo_model() -> None:
 
 
 @pytest.mark.asyncio
-@mock.patch("openai.ChatCompletion.create", partial(completion_mock_response, fail=True))
+@mock.patch("openai.ChatCompletion.acreate", partial(completion_mock_response, fail=True))
 async def test_ask_fail_with_turbo_model() -> None:
     chatgpt = ChatGPT(ChatGPTModels.TURBO.value())
     with pytest.raises(ChatGPTExecption):
@@ -71,7 +71,7 @@ async def test_ask_fail_with_turbo_model() -> None:
 
 @pytest.mark.asyncio
 @mock.patch("modules.voice.Voice.play_voice_file", play_mock)
-@mock.patch("openai.ChatCompletion.create", completion_mock_response)
+@mock.patch("openai.ChatCompletion.acreate", completion_mock_response)
 async def test_ask_with_turbo_model_and_enable_voice_assistant() -> None:
     chatgpt = ChatGPT(ChatGPTModels.TURBO.value(), Voice(WhisperModels.WHISPER1))
     response_text = await chatgpt.ask("Hello, How are you?")
@@ -80,7 +80,7 @@ async def test_ask_with_turbo_model_and_enable_voice_assistant() -> None:
 
 
 @pytest.mark.asyncio
-@mock.patch("openai.ChatCompletion.create", completion_mock_response)
+@mock.patch("openai.ChatCompletion.acreate", completion_mock_response)
 async def test_ask_with_turbo_model_and_paid_version() -> None:
     chatgpt = ChatGPT(ChatGPTModels.TURBO.value(), paid=True)
     response_text = await chatgpt.ask("Hello, How are you?")
@@ -90,7 +90,7 @@ async def test_ask_with_turbo_model_and_paid_version() -> None:
 
 @pytest.mark.asyncio
 @mock.patch("modules.voice.Voice.play_voice_file", play_mock)
-@mock.patch("openai.ChatCompletion.create", completion_mock_response)
+@mock.patch("openai.ChatCompletion.acreate", completion_mock_response)
 async def test_ask_with_turbo_model_and_paid_version_and_enable_voice_assistant() -> None:
     chatgpt = ChatGPT(ChatGPTModels.TURBO.value(), Voice(WhisperModels.WHISPER1), paid=True)
     response_text = await chatgpt.ask("Hello, How are you?")

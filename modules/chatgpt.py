@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import asyncio
+import itertools
 import os
-import sys
 from asyncio import create_task
 from asyncio import get_event_loop
-from asyncio import sleep
 from dataclasses import dataclass
 from functools import partial
 from typing import Dict
@@ -59,18 +59,17 @@ class ChatGPTResponse:
     usage: Usage
 
 
-async def print_waiting_text(second: int) -> None:
-    message = f"\rWaiting a response from ChatGPT{'.' * (second % 3 + 1)}"
-    print(message, end="", flush=True)
-    await sleep(0.5)
-
-
 async def print_waiting_prompt() -> None:
-    second = 0
+    for char in itertools.cycle([r".", r"..", r"..."]):
+        status = f"\rWaiting a response from ChatGPT{char}"
+        print(status, flush=True, end="")
+        try:
+            await asyncio.sleep(0.5)
+        except asyncio.CancelledError:
+            break
 
-    while True:
-        await print_waiting_text(second)
-        second += 1
+    blanks = " " * len(status)
+    print(f"\r{blanks}\r", end="")
 
 
 class ChatGPT:
@@ -119,15 +118,8 @@ class ChatGPT:
 
         waiting_response = create_task(print_waiting_prompt())
 
-        response = await get_event_loop().run_in_executor(
-            None,
-            partial(
-                openai.ChatCompletion.create,
-                model=self.model.name,
-                messages=self.messages,
-                max_tokens=self.model.token,
-                temperature=0.5,
-            ),
+        response = await openai.ChatCompletion.acreate(  # type:ignore
+            model=self.model.name, messages=self.messages, max_tokens=self.model.token, temperature=0.5
         )
 
         waiting_response.cancel()
@@ -140,15 +132,11 @@ class ChatGPT:
     async def send_question_with_others_models(self, text: str) -> str:
         waiting_response = create_task(print_waiting_prompt())
 
-        response = await get_event_loop().run_in_executor(
-            None,
-            partial(
-                openai.Completion.create,
-                engine=self.model.name,
-                prompt=text,
-                max_tokens=self.model.token,
-                temperature=0.5,
-            ),
+        response = await openai.Completion.acreate(  # type:ignore
+            engine=self.model.name,
+            prompt=text,
+            max_tokens=self.model.token,
+            temperature=0.5,
         )
 
         waiting_response.cancel()
