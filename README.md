@@ -1,10 +1,17 @@
-# chatpg (0.1.0)
+# chatgpt-cli (0.1.1)
 
 [![CI](https://github.com/sammiee5311/chatpg/actions/workflows/CI.yaml/badge.svg)](https://github.com/sammiee5311/chatpg/actions/workflows/CI.yaml) [![python](./imgs/python-version.svg)]() [![](./imgs/coverage.svg?dummy=8484744)]()
 
 ChatGPT cli version with history.
 
-## prerequisites
+# How to use
+- Install `ffmpeg` if you didn't install it on your machine.
+- Create a virtualenv (Optional)
+- Use `pip install -r requirements.txt` command to install the dependencies.
+- Check `python main.py --help` for more detailed arguments
+- Use `python main.py <args>` to run the ChatGPT-cli.
+
+# Pre-requisites
 - <= python 3.8
 - ffmpeg
 
