@@ -26,7 +26,10 @@ async def completion_mock_response(**kwgs: dict[str, Any]) -> CompletionMockResp
 
     return CompletionMockResponse(
         choices=[
-            {"text": "I am good, how are you?", "message": {"role": "assistant", "content": "I am good, how are you?"}}
+            {
+                "text": "I am good, how are you?",
+                "message": {"role": "assistant", "content": "I am good, how are you?"},
+            }
         ]
     )
 

@@ -40,7 +40,11 @@ class ContinuousWithHistory:
         self.init_turbo()
 
     def init_turbo(self) -> None:
-        options = {"1": self.delete_history, "2": self.activate_history, "0": lambda: sys.exit()}
+        options = {
+            "1": self.delete_history,
+            "2": self.activate_history,
+            "0": lambda: sys.exit(),
+        }
         print("## Choose option ##\nDelete history [1]\nStart asking [2]\nExit [0]")
         idx = self.get_input("choose: ", lambda x: int(x) in range(3))
         options[idx]()
@@ -77,7 +81,10 @@ class ContinuousWithHistory:
             print("### START ASKING ###")
             self.show_all_messages(all_messages)
 
-            idx = self.get_input("choose: ", lambda x: x.isdigit() and int(x) in range(len(all_messages) + 1))
+            idx = self.get_input(
+                "choose: ",
+                lambda x: x.isdigit() and int(x) in range(len(all_messages) + 1),
+            )
 
             if idx != "0":
                 name, created_at = all_messages[int(idx) - 1]
@@ -87,7 +94,11 @@ class ContinuousWithHistory:
     def process_save_history(self, messages: list[dict[str, str]]) -> None:
         answer = input("Do you want to save message history? [y/n]")
         if answer == "y":
-            name = self.get_input("Choose name of the history: ", lambda x: len(x.strip()) > 0, "Name cannot be empty.")
+            name = self.get_input(
+                "Choose name of the history: ",
+                lambda x: len(x.strip()) > 0,
+                "Name cannot be empty.",
+            )
             self.history.save_messages(name, messages)
 
     def show_all_messages(self, all_messages: list[tuple[str, str]]) -> None:

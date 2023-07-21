@@ -119,7 +119,10 @@ class ChatGPT:
         waiting_response = create_task(print_waiting_prompt())
 
         response = await openai.ChatCompletion.acreate(  # type:ignore
-            model=self.model.name, messages=self.messages, max_tokens=self.model.token, temperature=0.5
+            model=self.model.name,
+            messages=self.messages,
+            max_tokens=self.model.token,
+            temperature=0.5,
         )
 
         waiting_response.cancel()

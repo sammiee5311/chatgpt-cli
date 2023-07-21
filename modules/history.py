@@ -61,18 +61,27 @@ class History:
 
     def delete_messages(self, name: str, created_at: str) -> None:
         with self.database() as curr:
-            curr.execute("DELETE FROM history WHERE name = ? AND created_at = ?;", (name, created_at))
+            curr.execute(
+                "DELETE FROM history WHERE name = ? AND created_at = ?;",
+                (name, created_at),
+            )
         logger.info(f"{name} - {created_at} has been deleted.")
 
     def save_messages(self, name: str, messages: list[dict[str, str]]) -> None:
         with self.database() as curr:
-            curr.execute("INSERT INTO history (name, messages) VALUES (?, ?);", (name, orjson.dumps(messages)))
+            curr.execute(
+                "INSERT INTO history (name, messages) VALUES (?, ?);",
+                (name, orjson.dumps(messages)),
+            )
         logger.info(f"{name} has been saved.")
 
     def get_single_messages(self, name: str, created_at: str | None = None) -> list[dict[str, str]]:
         with self.database() as curr:
             if created_at:
-                curr.execute("SELECT messages FROM history WHERE name = ? AND created_at = ?;", (name, created_at))
+                curr.execute(
+                    "SELECT messages FROM history WHERE name = ? AND created_at = ?;",
+                    (name, created_at),
+                )
             else:
                 curr.execute("SELECT messages FROM history WHERE name = ?;", (name,))
 
