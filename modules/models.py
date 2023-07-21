@@ -22,6 +22,24 @@ class Turbo:
 
 
 @dataclass
+class GPTFour:
+    name: str = "gpt-4"
+    token: int = 8192
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
+
+
+@dataclass
+class GPTFour32K:
+    name: str = "gpt-4-32k"
+    token: int = 32768
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
+
+
+@dataclass
 class Davinci:
     name: str = "text-davinci-003"
     token: int = 4000
@@ -63,6 +81,8 @@ class ChatGPTModels(Enum):
     CURIE = Curie
     BABBAGE = Babbage
     ADA = Ada
+    GPT_4 = GPTFour
+    GPT_4_32K = GPTFour32K
 
 
 class WhisperModels(Enum):
